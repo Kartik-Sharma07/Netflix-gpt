@@ -1,11 +1,71 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import Header from "./Header"
+import { checkValidData } from "../utils/validate";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
 
 const Login = () => {
   const [isSignInForm, setSignInForm] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const navigate = useNavigate(); // Used for navigating to a route
+  const dispatch = useDispatch();
+
+  const email = useRef(null);
+  const password = useRef(null);
+  const name = useRef(null);
+
   const toggleSignInForm = () => {
     setSignInForm(!isSignInForm);
   }
+
+  const handleButtonClick = () => {
+    const message = checkValidData(email.current.value, password.current.value, name?.current?.value);
+    setErrorMessage(message);
+
+    if(message) return;
+
+    if(!isSignInForm){
+        createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+        .then((userCredential) => {
+          // Signed up 
+          const user = userCredential.user;
+          updateProfile(user, {
+            displayName: name?.current?.value, photoURL: "https://occ-0-6247-2164.1.nflxso.net/dnm/api/v6/K6hjPJd6cR6FpVELC5Pd6ovHRSk/AAAABdpkabKqQAxyWzo6QW_ZnPz1IZLqlmNfK-t4L1VIeV1DY00JhLo_LMVFp936keDxj-V5UELAVJrU--iUUY2MaDxQSSO-0qw.png?r=e6e"
+          }).then(() => {
+            // Profile updated!
+            const {uid, email, displayName, photoURL} = auth.currentUser;
+            dispatch(addUser({uid: uid, email: email, displayName: displayName, photoURL: photoURL}));
+            navigate("/browse");
+          }).catch((error) => {
+            // An error occurred
+            setErrorMessage(error.message);
+          });
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(`${errorCode} - ${errorMessage}`);
+        });
+    } else{
+        signInWithEmailAndPassword(auth, email.current.value, password.current.value)
+          .then((userCredential) => {
+            // Signed in 
+            const user = userCredential.user;
+            console.log(user);
+            navigate("/browse");
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            setErrorMessage(`Invalid credentials`);
+          });
+    }
+  }
+
   return (
     <div className="flex flex-col">
         <div className="absolute top-0 -z-1">
@@ -14,13 +74,14 @@ const Login = () => {
         <div className="absolute top-0 -z-1 h-screen w-screen bg-black bg-opacity-50">
         </div>
         <Header/>
-        <form className="self-center p-12 bg-black bg-opacity-70 py-192 px-272 w-96">
+        <form onSubmit={(e) => e.preventDefault()} className="self-center p-12 bg-black bg-opacity-70 py-192 px-272 w-96">
             <h2 className= "mb-8 text-3xl font-bold text-white">{isSignInForm ? "Sign In" : "Sign Up"}</h2>
-            {(!isSignInForm) && (<input type="text" placeholder="Name" className="w-full py-4 px-2 mb-4 border font-semibold text-white placeholder-gray-400 border-gray-400 bg-white bg-opacity-10 rounded"/>)}
-            <input type="text" placeholder="Email Address" className="w-full py-3 px-2 mb-4 border font-semibold text-white placeholder-gray-400 border-gray-400 bg-white bg-opacity-10 rounded"/>
-            <input type="password" placeholder="Password" className="w-full py-3 px-2 mb-4 border font-semibold text-white placeholder-gray-400 border-gray-400 bg-white bg-opacity-10 rounded"/>
-            <button className="w-full p-2 mb-6 text-white font-semibold bg-red-700 rounded">Sign in</button>
-            <div className="text-white">{isSignInForm ? "New to Netflix? " : "Already registered "}<span className="cursor-pointer hover:underline" onClick={toggleSignInForm}>{isSignInForm ? "Sign up now." : "Sign In Now"}</span></div>
+            {(!isSignInForm) && (<input type="text" placeholder="Full Name" ref={name} className="w-full py-4 px-2 mb-4 border font-semibold text-white placeholder-gray-400 border-gray-400 bg-white bg-opacity-10 rounded"/>)}
+            <input type="text" placeholder="Email Address" ref={email} className="w-full py-3 px-2 mb-4 border font-semibold text-white placeholder-gray-400 border-gray-400 bg-white bg-opacity-10 rounded"/>
+            <input type="password" placeholder="Password" ref={password} className="w-full py-3 px-2 mb-4 border font-semibold text-white placeholder-gray-400 border-gray-400 bg-white bg-opacity-10 rounded"/>
+            {(errorMessage) ? <div className="text-red-700 mb-4">{errorMessage}</div> : ""}
+            <button className="w-full p-2 mb-6 text-white font-semibold bg-red-700 rounded" onClick={handleButtonClick}>{isSignInForm ? "Sign In" : "Sign Up"}</button>
+            <div className="text-white">{isSignInForm ? "New to Netflix? " : "Already registered? "}<span className="cursor-pointer hover:underline" onClick={toggleSignInForm}>{isSignInForm ? "Sign up now." : "Sign In Now"}</span></div>
         </form>
     </div>
   )
