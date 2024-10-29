@@ -7,7 +7,10 @@ module.exports = {
     extend: {
       zIndex: {
         '-1': '-1',
-      }
+      },
+      scale: {
+        '200': '2',
+      },
     },
   },
   plugins: [],
