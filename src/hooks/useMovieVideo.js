@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { TMDB_API_OPTIONS } from "../utils/constants";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addMovieTrailer } from "../utils/movieSlice";
 
 const useMovieVideo = async (movie_id) => {
   
   const dispatch = useDispatch();
+
+  const movieVideo = useSelector((store) => store.movies.addMovieTrailer);
 
   const TMDB_MOVIES_VIDEO_URL = `https://api.themoviedb.org/3/movie/${movie_id}/videos?language=en-US`;
   
@@ -19,7 +21,7 @@ const useMovieVideo = async (movie_id) => {
   };
 
   useEffect(() => {
-      getMovieVideo();
+      !movieVideo && getMovieVideo();
   }, []);
 };
 

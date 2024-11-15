@@ -6,9 +6,10 @@ const SecondaryContainer = () => {
     const popularMovies = useSelector(store => store.movies?.addPopularMovies);
 
     if(!movies) return;
+    if(!popularMovies) return;
     
     return (
-        <div className="bg-black">
+        <div className="bg-black h-200">
             <div className="relative -top-60 z-20">
                 <MovieList title="Now Playing" movies={movies}/>
                 <MovieList title="Popular" movies={popularMovies}/>

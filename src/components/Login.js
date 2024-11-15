@@ -5,7 +5,8 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfi
 import { auth } from "../utils/firebase";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
-import {USER_AVATAR} from "../utils/constants"
+import {USER_AVATAR} from "../utils/constants";
+import {NETFLIX_LOGIN_BACKGROUND_IMG} from "../utils/constants";
 
 const Login = () => {
   const [isSignInForm, setSignInForm] = useState(true);
@@ -66,7 +67,7 @@ const Login = () => {
   return (
     <div className="flex flex-col">
         <div className="absolute top-0 -z-1">
-            <img className="h-screen w-screen" src="https://assets.nflxext.com/ffe/siteui/vlv3/7c0e18aa-2c95-474d-802e-7f30e75dcca4/web/IN-en-20241014-TRIFECTA-perspective_e7121311-c11e-4809-a3e6-22abffa33569_large.jpg" alt="login-background-image"/>
+            <img className="h-screen w-screen object-cover" src={NETFLIX_LOGIN_BACKGROUND_IMG} alt="login-background-image"/>
         </div>
         <div className="absolute top-0 -z-1 h-screen w-screen bg-black bg-opacity-50">
         </div>

@@ -11,6 +11,9 @@ module.exports = {
       scale: {
         '200': '2',
       },
+      height: {
+        '200': '50rem'
+      }
     },
   },
   plugins: [],
